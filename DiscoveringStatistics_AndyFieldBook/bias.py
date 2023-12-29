@@ -1,3 +1,4 @@
+from matplotlib import axes
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,6 +10,8 @@ print(data_frame)
 
 data = data_frame["day1"]
 
+histogram: axes.Axes = plt.subplot2grid((2, 1), (0, 0))
+boxplot: axes.Axes = plt.subplot2grid((2, 1), (1, 0))
 
 #####################################
 #       Histogram               #####
@@ -16,16 +19,13 @@ data = data_frame["day1"]
 
 # Generate historgram of all scores arranged into 0.5 bins from 0 to just beyond the maximum score
 bins = np.arange(0, max(data) + 0.5, 0.5)
-plt.hist(data, bins, edgecolor="black")
+histogram.hist(data, bins, edgecolor="black")
 
 # Set x-axis label
-plt.xlabel("Hygeine (Day 1 Download)")
+histogram.set_xlabel("Hygeine (Day 1 Download)")
 
 # Set y-axis label
-plt.ylabel("Frequency")
-
-# Add borders to each bar
-plt.show()
+histogram.set_ylabel("Frequency")
 
 #####################################
 #       Boxplot               #######
@@ -35,17 +35,17 @@ plt.show()
 box = plt.boxplot(data, vert=True)
 
 # Set x-axis label
-plt.xlabel("Hygeine (Day 1 Download)")
+boxplot.set_xlabel("Hygeine (Day 1 Download)")
 
 # Set y-axis label
-plt.ylabel("Frequency")
+boxplot.set_ylabel("Frequency")
 
 # Get outliers
 outliers = box["fliers"][0].get_data()[1]
 
 # Add text value to each outlier by
 for outlier in outliers:
-    plt.text(1.02, outlier, outlier)
+    boxplot.text(1.02, outlier, outlier)
 
 plt.show()
 
