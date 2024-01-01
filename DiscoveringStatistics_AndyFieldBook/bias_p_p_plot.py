@@ -2,104 +2,71 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import scipy.stats as stats
 import statsmodels.graphics.gofplots as sm
-
-
-def stats_table(dataFrame: pd.DataFrame | pd.Series, title: str):
-    dataFrameMean = dataFrame.mean()
-    dataFrameMode = dataFrame.mode()
-    dataFrameMedian = dataFrame.median()
-    dataFrameRange = dataFrame.max() - dataFrame.min()
-    dataFrameStandardDeviation = dataFrame.std()
-    dataFrameVariance = dataFrame.var()
-    dataFrameQuartile = dataFrame.quantile([0.25, 0.5, 0.75])
-    dataFrameKurtosis = dataFrame.kurtosis()
-    dataFrameSkewness = dataFrame.skew()
-
-    # Print the statistics
-    print(title)
-    print("\n")
-    print("Mean: ", dataFrameMean)
-    print("Mode: ", dataFrameMode)
-    print("Median: ", dataFrameMedian)
-    print("Range: ", dataFrameRange)
-    print("Standard Deviation: ", dataFrameStandardDeviation)
-    print("Variance: ", dataFrameVariance)
-    print("Quartile: ", dataFrameQuartile)
-    print("Kurtosis: ", dataFrameKurtosis)
-    print("Skewness: ", dataFrameSkewness)
-    print("\n")
-    print("------------------------------------------------------")
-    print("\n")
 
 
 data_frame = pd.read_spss("./DataSets/DownloadFestival.sav")
 
-day1Data = data_frame["day1"]
-day2Data = data_frame["day2"]
-day3Data = data_frame["day3"]
+# Remove non existant values and outliers where the z-score is greater than 3
+day1Data = data_frame["day1"].dropna()
+day2Data = data_frame["day2"].dropna()
+day3Data = data_frame["day3"].dropna()
 
-day1Data = day1Data.dropna()
-day2Data = day2Data.dropna()
-day3Data = day3Data.dropna()
+day1Data = day1Data[day1Data.between(day1Data.quantile(0.01), day1Data.quantile(0.99))]
+day2Data = day2Data[day2Data.between(day2Data.quantile(0.01), day2Data.quantile(0.99))]
+day3Data = day3Data[day3Data.between(day3Data.quantile(0.01), day3Data.quantile(0.99))]
 
-figure, axis = plt.subplots(3, 2)
+figure, (
+    (day1_hist, day1_pp_plot),
+    (day2_hist, day2_pp_plot),
+    (day3_hist, day3_pp_plot),
+) = plt.subplots(nrows=3, ncols=2)
 
-day1Histogram = axis[0, 0]
-day2Histogram = axis[1, 0]
-day3Histogram = axis[2, 0]
+day1bins = np.arange(0, max(day1Data) + 0.1, 0.2)
+day2bins = np.arange(0, max(day2Data) + 0.1, 0.2)
+day3bins = np.arange(0, max(day3Data) + 0.1, 0.2)
 
-day1p_p_plot = axis[0, 1]
-day2p_p_plot = axis[1, 1]
-day3p_p_plot = axis[2, 1]
+day1_data = {
+    "Data": day1Data,
+    "Histogram": day1_hist,
+    "PP Plot": day1_pp_plot,
+    "Bins": day1bins,
+    "Title": "Day 2",
+}
 
-day1bins = np.arange(0, max(day1Data) + 0.5, 0.5)
-day2bins = np.arange(0, max(day2Data) + 0.1, 0.1)
-day3bins = np.arange(0, max(day3Data) + 0.1, 0.1)
+day2_data = {
+    "Data": day2Data,
+    "Histogram": day2_hist,
+    "PP Plot": day2_pp_plot,
+    "Bins": day2bins,
+    "Title": "Day 2",
+}
 
-sns.histplot(
-    day1Data,
-    kde=True,
-    ax=day1Histogram,
-    bins=day1bins,
-    color="black",
-    edgecolor="black",
-)
+day3_data = {
+    "Data": day3Data,
+    "Histogram": day3_hist,
+    "PP Plot": day3_pp_plot,
+    "Bins": day3bins,
+    "Title": "Day 3",
+}
 
-sns.histplot(
-    day2Data,
-    kde=True,
-    ax=day2Histogram,
-    bins=day2bins,
-    color="black",
-    edgecolor="black",
-)
+combined_data = [day1_data, day2_data, day3_data]
 
-sns.histplot(
-    day3Data,
-    kde=True,
-    ax=day3Histogram,
-    bins=day3bins,
-    color="black",
-    edgecolor="black",
-)
+for data in combined_data:
+    sns.histplot(
+        data["Data"],
+        kde=True,
+        ax=data["Histogram"],
+        bins=data["Bins"],
+        color="blue",
+        edgecolor="black",
+    )
 
-sm.ProbPlot(day1Data, fit=True).ppplot(line="45", ax=day1p_p_plot)
-sm.ProbPlot(day2Data, fit=True).ppplot(line="45", ax=day2p_p_plot)
-sm.ProbPlot(day3Data, fit=True).ppplot(line="45", ax=day3p_p_plot)
+    data["Histogram"].set_xlabel(str.format("Hygeine (%s Download)", data["Title"]))
+    data["Histogram"].set_ylabel("Frequency")
 
-# Set x-axis label
-day1Histogram.set_xlabel("Hygeine (Day 1 Download)")
-day2Histogram.set_xlabel("Hygeine (Day 2 Download)")
-day3Histogram.set_xlabel("Hygeine (Day 3 Download)")
+    sm.ProbPlot(data["Data"], fit=True).ppplot(line="45", ax=data["PP Plot"])
 
-# Set y-axis label
-day1Histogram.set_ylabel("Frequency")
-day2Histogram.set_ylabel("Frequency")
-day3Histogram.set_ylabel("Frequency")
-
-day1stats = stats_table(day1Data, "Day 1 Stats")
-day2stats = stats_table(day2Data, "Day 2 Stats")
-day3stats = stats_table(day3Data, "Day 3 Stats")
-
+plt.tight_layout()
 plt.show()
