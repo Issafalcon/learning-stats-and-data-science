@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.graphics.gofplots as sm
 
-def stats_table(dataFrame: pd.DataFrame | pd.Series):
-    # Calculate mean, mode, median, range, standard deviation, variance, quartile, splits, kurtosis and skewness
+
+def stats_table(dataFrame: pd.DataFrame | pd.Series, title: str):
     dataFrameMean = dataFrame.mean()
     dataFrameMode = dataFrame.mode()
     dataFrameMedian = dataFrame.median()
@@ -13,25 +13,25 @@ def stats_table(dataFrame: pd.DataFrame | pd.Series):
     dataFrameStandardDeviation = dataFrame.std()
     dataFrameVariance = dataFrame.var()
     dataFrameQuartile = dataFrame.quantile([0.25, 0.5, 0.75])
-    dataFrameSplits = np.array_split(dataFrame, 4)
     dataFrameKurtosis = dataFrame.kurtosis()
     dataFrameSkewness = dataFrame.skew()
 
-    # Return new datafram of statistics
-    return pd.DataFrame(
-        {
-            "Mean": dataFrameMean,
-            "Mode": dataFrameMode,
-            "Median": dataFrameMedian,
-            "Range": dataFrameRange,
-            "Standard Deviation": dataFrameStandardDeviation,
-            "Variance": dataFrameVariance,
-            "Quartile": dataFrameQuartile,
-            "Splits": dataFrameSplits,
-            "Kurtosis": dataFrameKurtosis,
-            "Skewness": dataFrameSkewness,
-        }
-    )
+    # Print the statistics
+    print(title)
+    print("\n")
+    print("Mean: ", dataFrameMean)
+    print("Mode: ", dataFrameMode)
+    print("Median: ", dataFrameMedian)
+    print("Range: ", dataFrameRange)
+    print("Standard Deviation: ", dataFrameStandardDeviation)
+    print("Variance: ", dataFrameVariance)
+    print("Quartile: ", dataFrameQuartile)
+    print("Kurtosis: ", dataFrameKurtosis)
+    print("Skewness: ", dataFrameSkewness)
+    print("\n")
+    print("------------------------------------------------------")
+    print("\n")
+
 
 data_frame = pd.read_spss("./DataSets/DownloadFestival.sav")
 
@@ -43,7 +43,7 @@ day1Data = day1Data.dropna()
 day2Data = day2Data.dropna()
 day3Data = day3Data.dropna()
 
-figure, axis = plt.subplots(4, 2)
+figure, axis = plt.subplots(3, 2)
 
 day1Histogram = axis[0, 0]
 day2Histogram = axis[1, 0]
@@ -98,13 +98,8 @@ day1Histogram.set_ylabel("Frequency")
 day2Histogram.set_ylabel("Frequency")
 day3Histogram.set_ylabel("Frequency")
 
-day1stats = stats_table(day1Data)
-day2stats = stats_table(day2Data)
-day3stats = stats_table(day3Data)
-
-axis[3, 0].table(cellText=day1stats.values, colLabels=day1stats.columns, loc='center')
+day1stats = stats_table(day1Data, "Day 1 Stats")
+day2stats = stats_table(day2Data, "Day 2 Stats")
+day3stats = stats_table(day3Data, "Day 3 Stats")
 
 plt.show()
-
-
-
